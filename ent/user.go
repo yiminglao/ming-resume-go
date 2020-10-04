@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"gqlgen-ent/ent/user"
+	"go_resume/ent/user"
 	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -37,27 +37,6 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// Photo holds the value of the "photo" field.
 	Photo string `json:"photo,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
-}
-
-// UserEdges holds the relations/edges for other nodes in the graph.
-type UserEdges struct {
-	// Pets holds the value of the pets edge.
-	Pets []*Pet
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// PetsOrErr returns the Pets value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) PetsOrErr() ([]*Pet, error) {
-	if e.loadedTypes[0] {
-		return e.Pets, nil
-	}
-	return nil, &NotLoadedError{edge: "pets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -146,11 +125,6 @@ func (u *User) assignValues(values ...interface{}) error {
 		u.Photo = value.String
 	}
 	return nil
-}
-
-// QueryPets queries the pets edge of the User.
-func (u *User) QueryPets() *PetQuery {
-	return (&UserClient{config: u.config}).QueryPets(u)
 }
 
 // Update returns a builder for updating this User.

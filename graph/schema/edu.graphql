@@ -1,0 +1,17 @@
+type Edu {
+	id: ID!
+	school: String
+	major: String
+	gpa: String
+	graduationDate: Date
+	description: String
+}
+
+input eduInput {
+	id: ID
+	school: String
+	major: String
+	gpa: String
+	graduationDate: Date
+	description: String
+}

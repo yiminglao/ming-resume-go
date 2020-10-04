@@ -2,7 +2,6 @@ package schema
 
 import (
 	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -25,12 +24,5 @@ func (User) Fields() []ent.Field {
 		field.String("email").Optional(),
 		field.String("phone").Optional(),
 		field.String("photo").Optional(),
-	}
-}
-
-// Edges of the User.
-func (User) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("pets", Pet.Type),
 	}
 }

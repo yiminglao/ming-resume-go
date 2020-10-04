@@ -1,0 +1,23 @@
+type Experience {
+	id: ID!
+	company: String
+	jobTitle: String
+	city: String
+	state: String
+	zip: Date
+	description: String
+	startDate: Date
+	endDate: Date
+}
+
+input experienceInput {
+	id: ID
+	company: String
+	jobTitle: String
+	city: String
+	state: String
+	zip: Date
+	description: String
+	startDate: Date
+	endDate: Date
+}

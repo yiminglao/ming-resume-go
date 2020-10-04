@@ -5,8 +5,8 @@ package ent
 import (
 	"context"
 	"fmt"
-	"gqlgen-ent/ent/predicate"
-	"gqlgen-ent/ent/user"
+	"go_resume/ent/predicate"
+	"go_resume/ent/user"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"

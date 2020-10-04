@@ -1,0 +1,25 @@
+type User {
+  id: ID!
+  username: String
+  firstName: String
+  lastName: String
+  address: String
+  city: String
+  zipcode: String
+  email: String
+  phone: String
+  photo: String
+}
+
+input userInput {
+  id: ID
+  username: String
+  firstName: String
+  lastName: String
+  address: String
+  city: String
+  zip: String
+  email: String
+  phone: String
+  photo: String
+}

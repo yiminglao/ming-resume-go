@@ -1,0 +1,13 @@
+type Project {
+	id: ID!
+	name: String
+	icon: String
+	link: String
+}
+
+input projectInput {
+	id: ID
+	name: String
+	icon: String
+	link: String
+}

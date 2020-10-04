@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"gqlgen-ent/graph"
-	"gqlgen-ent/graph/generated"
+	graph "go_resume/graph/resolver"
 	"log"
 	"net/http"
 	"os"
 
-	"gqlgen-ent/ent"
+	"go_resume/ent"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -35,7 +34,8 @@ func main() {
 
 	defer client.Close()
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{client}}))
+	srv := handler.NewDefaultServer(graph.NewSchema(client))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

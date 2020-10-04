@@ -4,9 +4,9 @@ package enttest
 
 import (
 	"context"
-	"gqlgen-ent/ent"
+	"go_resume/ent"
 	// required by schema hooks.
-	_ "gqlgen-ent/ent/runtime"
+	_ "go_resume/ent/runtime"
 
 	"github.com/facebook/ent/dialect/sql/schema"
 )

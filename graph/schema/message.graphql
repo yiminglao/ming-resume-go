@@ -1,0 +1,14 @@
+type Message {
+	id: ID!
+	email: String
+	phone: String
+	subject: String
+	message: String
+}
+
+input messageInput {
+	email: String
+	phone: String
+	subject: String
+	message: String
+}

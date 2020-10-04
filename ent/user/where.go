@@ -3,10 +3,9 @@
 package user
 
 import (
-	"gqlgen-ent/ent/predicate"
+	"go_resume/ent/predicate"
 
 	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their identifier.
@@ -1485,34 +1484,6 @@ func PhotoEqualFold(v string) predicate.User {
 func PhotoContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPhoto), v))
-	})
-}
-
-// HasPets applies the HasEdge predicate on the "pets" edge.
-func HasPets() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PetsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
-func HasPetsWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PetsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
 	})
 }
 

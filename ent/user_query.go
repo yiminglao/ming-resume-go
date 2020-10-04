@@ -4,12 +4,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
-	"gqlgen-ent/ent/pet"
-	"gqlgen-ent/ent/predicate"
-	"gqlgen-ent/ent/user"
+	"go_resume/ent/predicate"
+	"go_resume/ent/user"
 	"math"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -25,8 +23,6 @@ type UserQuery struct {
 	order      []OrderFunc
 	unique     []string
 	predicates []predicate.User
-	// eager-loading edges.
-	withPets *PetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,43 +52,25 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryPets chains the current query on the pets edge.
-func (uq *UserQuery) QueryPets() *PetQuery {
-	query := &PetQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sqlgraph.To(pet.Table, pet.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(1).All(ctx)
+	nodes, err := uq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(us) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{user.Label}
 	}
-	return us[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (uq *UserQuery) FirstX(ctx context.Context) *User {
-	u, err := uq.First(ctx)
+	node, err := uq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
@@ -119,13 +97,13 @@ func (uq *UserQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only User entity in the query, returns an error if not exactly one entity was returned.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(2).All(ctx)
+	nodes, err := uq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(us) {
+	switch len(nodes) {
 	case 1:
-		return us[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{user.Label}
 	default:
@@ -135,11 +113,11 @@ func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (uq *UserQuery) OnlyX(ctx context.Context) *User {
-	u, err := uq.Only(ctx)
+	node, err := uq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
@@ -178,11 +156,11 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (uq *UserQuery) AllX(ctx context.Context) []*User {
-	us, err := uq.All(ctx)
+	nodes, err := uq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return us
+	return nodes
 }
 
 // IDs executes the query and returns a list of User ids.
@@ -253,17 +231,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-//  WithPets tells the query-builder to eager-loads the nodes that are connected to
-// the "pets" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := &PetQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withPets = query
-	return uq
-}
-
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -328,11 +295,8 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes       = []*User{}
-		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
-			uq.withPets != nil,
-		}
+		nodes = []*User{}
+		_spec = uq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
@@ -345,7 +309,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {
@@ -354,35 +317,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
-	if query := uq.withPets; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Pet(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.PetsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.user_pets
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Pets = append(node.Edges.Pets, n)
-		}
-	}
-
 	return nodes, nil
 }
 
@@ -428,7 +362,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := uq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, user.ValidColumn)
 			}
 		}
 	}
@@ -447,7 +381,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p(selector)
+		p(selector, user.ValidColumn)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -682,8 +616,17 @@ func (ugb *UserGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ugb.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := ugb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ugb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ugb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -696,7 +639,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, user.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }
@@ -916,6 +859,11 @@ func (us *UserSelect) BoolX(ctx context.Context) bool {
 }
 
 func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range us.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := us.sqlQuery().Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

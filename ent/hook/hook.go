@@ -5,21 +5,8 @@ package hook
 import (
 	"context"
 	"fmt"
-	"gqlgen-ent/ent"
+	"go_resume/ent"
 )
-
-// The PetFunc type is an adapter to allow the use of ordinary
-// function as Pet mutator.
-type PetFunc func(context.Context, *ent.PetMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f PetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PetMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PetMutation", m)
-	}
-	return f(ctx, mv)
-}
 
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
@@ -128,7 +115,7 @@ func HasFields(field string, fields ...string) Condition {
 
 // If executes the given hook under condition.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
 func If(hk ent.Hook, cond Condition) ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {

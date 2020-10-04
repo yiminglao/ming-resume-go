@@ -1,0 +1,29 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar Date
+
+type Query {
+	getUser: User
+
+	getEduById(id: ID!): Edu
+	getAllEdu: [Edu]
+
+	getExperienceById(id: ID!): Experience
+	getAllExp: [Experience]
+
+	getMessageById(id: ID!): Message
+	getAllMessage: [Message]
+
+	getProjectById(id: ID!): Project
+	getAllProject: [Project]
+}
+
+type Mutation {
+	updateUser(input: userInput!): User
+
+	addEdu(input: eduInput): Edu
+	updateEdu(input: eduInput): Edu
+	delEdu(id: ID!): String
+}

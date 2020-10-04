@@ -2,19 +2,86 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Edu struct {
+	ID             int     `json:"id"`
+	School         *string `json:"school"`
+	Major          *string `json:"major"`
+	Gpa            *string `json:"gpa"`
+	GraduationDate *string `json:"graduationDate"`
+	Description    *string `json:"description"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Experience struct {
+	ID          int     `json:"id"`
+	Company     *string `json:"company"`
+	JobTitle    *string `json:"jobTitle"`
+	City        *string `json:"city"`
+	State       *string `json:"state"`
+	Zip         *string `json:"zip"`
+	Description *string `json:"description"`
+	StartDate   *string `json:"startDate"`
+	EndDate     *string `json:"endDate"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Message struct {
+	ID      int     `json:"id"`
+	Email   *string `json:"email"`
+	Phone   *string `json:"phone"`
+	Subject *string `json:"subject"`
+	Message *string `json:"message"`
+}
+
+type Project struct {
+	ID   int     `json:"id"`
+	Name *string `json:"name"`
+	Icon *string `json:"icon"`
+	Link *string `json:"link"`
+}
+
+type EduInput struct {
+	ID             *int    `json:"id"`
+	School         *string `json:"school"`
+	Major          *string `json:"major"`
+	Gpa            *string `json:"gpa"`
+	GraduationDate *string `json:"graduationDate"`
+	Description    *string `json:"description"`
+}
+
+type ExperienceInput struct {
+	ID          *int    `json:"id"`
+	Company     *string `json:"company"`
+	JobTitle    *string `json:"jobTitle"`
+	City        *string `json:"city"`
+	State       *string `json:"state"`
+	Zip         *string `json:"zip"`
+	Description *string `json:"description"`
+	StartDate   *string `json:"startDate"`
+	EndDate     *string `json:"endDate"`
+}
+
+type MessageInput struct {
+	Email   *string `json:"email"`
+	Phone   *string `json:"phone"`
+	Subject *string `json:"subject"`
+	Message *string `json:"message"`
+}
+
+type ProjectInput struct {
+	ID   *int    `json:"id"`
+	Name *string `json:"name"`
+	Icon *string `json:"icon"`
+	Link *string `json:"link"`
+}
+
+type UserInput struct {
+	ID        *int    `json:"id"`
+	Username  *string `json:"username"`
+	FirstName *string `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Address   *string `json:"address"`
+	City      *string `json:"city"`
+	Zip       *string `json:"zip"`
+	Email     *string `json:"email"`
+	Phone     *string `json:"phone"`
+	Photo     *string `json:"photo"`
 }
