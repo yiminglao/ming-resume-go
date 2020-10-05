@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	graph "go_resume/graph/resolver"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -21,7 +23,18 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
-	client, err := ent.Open("postgres", "host=127.0.0.1 port=5434 user=postgres sslmode=disable dbname=resume password=dj2018")
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error getting env, not comming through %v", err)
+	} else {
+		fmt.Println("We are getting the env values")
+	}
+
+	connString := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"))
+
+	client, err := ent.Open(os.Getenv("DB_DRIVER"), connString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +47,6 @@ func main() {
 
 	defer client.Close()
 
-	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{client}}))
 	srv := handler.NewDefaultServer(graph.NewSchema(client))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

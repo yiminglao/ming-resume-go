@@ -7,6 +7,7 @@ require (
 	github.com/facebook/ent v0.4.3
 	github.com/facebookincubator/ent-contrib v0.0.0-20201004181123-0e6ac4cc1d3a
 	github.com/hashicorp/go-multierror v1.1.0
+	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.8.0
 	github.com/vektah/gqlparser/v2 v2.1.0
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.1

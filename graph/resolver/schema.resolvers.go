@@ -28,8 +28,7 @@ func (r *mutationResolver) DelEdu(ctx context.Context, id int) (*string, error) 
 }
 
 func (r *queryResolver) GetUser(ctx context.Context) (*ent.User, error) {
-
-	return r.client.User.Get(ctx, 1)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) GetEduByID(ctx context.Context, id int) (*model.Edu, error) {
